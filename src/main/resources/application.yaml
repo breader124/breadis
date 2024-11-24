@@ -1,0 +1,6 @@
+ktor:
+  application:
+    modules:
+      - com.breader.ApplicationKt.module
+  deployment:
+    port: 8080
