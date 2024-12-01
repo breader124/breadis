@@ -10,7 +10,7 @@ class SimpleStringDataParserTest {
 
     @Test
     fun `should parse simple string message`() {
-        assertEquals("OK", messageParser.parse("+OK\r\n").value)
+        assertEquals("OK", messageParser.parse("OK").value)
     }
 
     @Test
