@@ -1,5 +1,7 @@
 package com.breader.protocol
 
+import com.breader.protocol.parser.ErrorDataParser
+import com.breader.protocol.parser.IntegerDataParser
 import com.breader.protocol.parser.MessageParser
 import com.breader.protocol.parser.SimpleStringDataParser
 import com.breader.protocol.type.Data
@@ -7,7 +9,9 @@ import com.breader.protocol.type.Data
 class DefaultMessageParser : MessageParser {
 
     private val specializedParsers = mapOf<Char, MessageParser>(
-        '+' to SimpleStringDataParser()
+        '+' to SimpleStringDataParser(),
+        '-' to ErrorDataParser(),
+        ':' to IntegerDataParser()
     )
 
     override fun parse(rawMessage: String): Data {

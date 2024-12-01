@@ -1,8 +1,8 @@
 package com.breader.protocol.parser
 
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class SimpleStringDataParserTest {
 
@@ -15,16 +15,16 @@ class SimpleStringDataParserTest {
 
     @Test
     fun `should not parse simple string message with multiple termination signs`() {
-        assertThrows<IllegalArgumentException> { messageParser.parse("+OK\r\n") }
+        assertFailsWith<IllegalArgumentException> { messageParser.parse("+OK\r\n") }
     }
 
     @Test
     fun `should not parse simple string message with single carriage return sign`() {
-        assertThrows<IllegalArgumentException> { messageParser.parse("+OK\r") }
+        assertFailsWith<IllegalArgumentException> { messageParser.parse("+OK\r") }
     }
 
     @Test
     fun `should not parse simple string message with single new line sign`() {
-        assertThrows<IllegalArgumentException> { messageParser.parse("+OK\n") }
+        assertFailsWith<IllegalArgumentException> { messageParser.parse("+OK\n") }
     }
 }
