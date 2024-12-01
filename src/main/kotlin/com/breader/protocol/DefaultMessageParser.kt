@@ -12,8 +12,12 @@ class DefaultMessageParser : MessageParser {
 
     override fun parse(rawMessage: String): Data {
         val dataType = rawMessage.first()
+        val terminationSignPos = rawMessage.lastIndexOf("\r\n").let {
+            if (it == -1) throw IllegalArgumentException("No termination sign") else it
+        }
+
         specializedParsers[dataType]
-            ?.let { return it.parse(rawMessage) }
+            ?.let { return it.parse(rawMessage.substring(1, terminationSignPos)) }
             ?: throw IllegalArgumentException("Unsupported data type")
     }
 }

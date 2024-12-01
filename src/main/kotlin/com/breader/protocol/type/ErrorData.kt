@@ -1,3 +1,3 @@
 package com.breader.protocol.type
 
-class ErrorData(val value: String) : Data
+class ErrorData(val type: String, val message: String) : Data
