@@ -6,22 +6,22 @@ import kotlin.test.assertFailsWith
 
 class IntegerDataParserTest {
 
-    private val messageParser = IntegerDataParser()
+    private val dataParser = IntegerDataParser()
 
     @Test
     fun `should parse integer`() {
-        assertEquals(123, messageParser.parse("123").value)
+        assertEquals(123, dataParser.parse("123").value)
     }
 
     @Test
     fun `should parse negative integer`() {
-        assertEquals(-123, messageParser.parse("-123").value)
+        assertEquals(-123, dataParser.parse("-123").value)
     }
 
     @Test
     fun `should throw exception when parsing non-integer value`() {
         assertFailsWith<IllegalArgumentException> {
-            messageParser.parse("abc")
+            dataParser.parse("abc")
         }
     }
 }

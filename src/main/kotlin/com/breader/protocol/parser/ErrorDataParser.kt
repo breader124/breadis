@@ -2,7 +2,7 @@ package com.breader.protocol.parser
 
 import com.breader.protocol.type.ErrorData
 
-class ErrorDataParser : MessageParser {
+class ErrorDataParser : DataParser {
 
     override fun parse(message: String): ErrorData {
         val messageParts = message.split(' ', '\n')

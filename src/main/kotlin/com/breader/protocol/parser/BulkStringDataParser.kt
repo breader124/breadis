@@ -4,7 +4,7 @@ import com.breader.protocol.type.BulkStringData
 import com.breader.protocol.type.Data
 import com.breader.protocol.type.NullData
 
-class BulkStringDataParser : MessageParser {
+class BulkStringDataParser : DataParser {
 
     override fun parse(message: String): Data {
         val length = runCatching { message.substringBefore("\r\n", "").toInt() }

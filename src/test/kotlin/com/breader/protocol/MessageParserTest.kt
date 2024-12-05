@@ -3,9 +3,9 @@ package com.breader.protocol
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-class DefaultMessageParserTest {
+class MessageParserTest {
 
-    val messageParser = DefaultMessageParser()
+    val messageParser = MessageParser()
 
     @Test
     fun `should not parse unsupported data type`() {
