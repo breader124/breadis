@@ -37,7 +37,7 @@ class BulkStringDataParserTest {
 
     @Test
     fun `should parse null bulk string`() {
-        assertTrue(dataParser.parse("-1\r\n") is NullData)
+        assertTrue(dataParser.parse("-1") is NullData)
     }
 
     @Test
