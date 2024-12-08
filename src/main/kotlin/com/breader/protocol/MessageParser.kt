@@ -1,5 +1,6 @@
 package com.breader.protocol
 
+import com.breader.protocol.parser.ArrayDataParser
 import com.breader.protocol.parser.BulkStringDataParser
 import com.breader.protocol.parser.DataParser
 import com.breader.protocol.parser.ErrorDataParser
@@ -13,7 +14,8 @@ class MessageParser {
         '+' to SimpleStringDataParser(),
         '-' to ErrorDataParser(),
         ':' to IntegerDataParser(),
-        '$' to BulkStringDataParser()
+        '$' to BulkStringDataParser(),
+        '*' to ArrayDataParser()
     )
 
     fun parse(rawMessage: String): Data {

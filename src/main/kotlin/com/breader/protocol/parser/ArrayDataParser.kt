@@ -6,8 +6,8 @@ import com.breader.protocol.type.Data
 class ArrayDataParser : DataParser {
 
     companion object {
-        const val TYPE_LENGTH = 1
-        const val TERMINATOR_LENGTH = 2
+        private const val TYPE_LENGTH = 1
+        private const val TERMINATOR = "\r\n"
     }
 
     private val primitiveTypeDataParsers = mapOf<Char, DataParser>(
@@ -17,39 +17,49 @@ class ArrayDataParser : DataParser {
         '$' to BulkStringDataParser()
     )
 
-    // TODO support for nested arrays
-    override fun parse(data: String): ArrayData {
-        val arraySize = runCatching { data.substringBefore("\r\n", "").toInt() }
+    override fun parse(data: String): ArrayData = internalParse(data).first
+
+    private fun internalParse(data: String): Pair<ArrayData, String> {
+        val arraySize = runCatching { data.substringBefore(TERMINATOR, "").toInt() }
             .getOrElse { throw IllegalArgumentException(it.message) }
+        var contentToParse = data.substringAfter(TERMINATOR)
 
-        val parsedArrayContent = mutableListOf<Data>()
+        val parsedContent = mutableListOf<Data>()
+        repeat(arraySize) {
+            val type = contentToParse.first()
 
-        var rawArrayContent = data.substringAfter("\r\n")
-        repeat (arraySize) {
-            val type = rawArrayContent.first()
-            val data = rawArrayContent.extractNextData(type)
+            if (primitiveTypeDataParsers.keys.contains(type)) {
+                val data = contentToParse.extractNextData(type)
 
-            primitiveTypeDataParsers[type]?.parse(data)
-                ?.let { parsedArrayContent.add(it) }
-                ?: throw IllegalArgumentException("Unsupported data type: $data")
+                primitiveTypeDataParsers[type]?.parse(data)
+                    ?.let { parsedContent.add(it) }
+                    ?: throw IllegalArgumentException("Unsupported data type: $data")
 
-            rawArrayContent = rawArrayContent.substring(TYPE_LENGTH + data.length + TERMINATOR_LENGTH)
+                contentToParse = contentToParse.substring(TYPE_LENGTH + data.length + TERMINATOR.length)
+            } else {
+                val arrayWithoutType = contentToParse.substring(1)
+                val (parsedNestedArray, contentWithoutNestedArray) = internalParse(arrayWithoutType)
+
+                parsedContent.add(parsedNestedArray)
+                contentToParse = contentWithoutNestedArray
+            }
         }
 
-        return ArrayData(parsedArrayContent)
+        return Pair(ArrayData(parsedContent), contentToParse)
     }
 
     private fun String.extractNextData(type: Char): String = when (type) {
-        '+', '-', ':' -> substring(1).substringBefore("\r\n")
+        '+', '-', ':' -> substring(1).substringBefore(TERMINATOR)
         '$' -> {
-            val dataLength = substring(1).substringBefore("\r\n").toInt()
-            val lengthPos = indexOf("\r\n")
+            val dataLength = substring(1).substringBefore(TERMINATOR).toInt()
+            val lengthPos = indexOf(TERMINATOR)
             if (dataLength == -1) {
                 substring(1, lengthPos)
             } else {
-                substring(1, lengthPos + TERMINATOR_LENGTH + dataLength)
+                substring(1, lengthPos + TERMINATOR.length + dataLength)
             }
         }
+
         else -> throw IllegalArgumentException("Unsupported data type: $type")
     }
 }

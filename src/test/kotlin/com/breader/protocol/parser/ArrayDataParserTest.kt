@@ -60,7 +60,28 @@ class ArrayDataParserTest {
         val message = dataParser.parse("2\r\n*3\r\n:1\r\n:2\r\n:3\r\n*2\r\n+OK\r\n$5\r\nhello\r\n")
 
         assertEquals(2, message.value.size)
-        assertTrue(message.value[0] is ArrayData)
-        assertTrue(message.value[1] is ArrayData)
+        with(message.value[0] as ArrayData) {
+            for (i in 0 until 3) {
+                assertTrue(value[i] is IntegerData)
+            }
+        }
+        with(message.value[1] as ArrayData) {
+            assertTrue(value[0] is SimpleStringData)
+            assertTrue(value[1] is BulkStringData)
+        }
+    }
+
+    @Test
+    fun `should parse multi-level nested array`() {
+        val message = dataParser.parse("1\r\n*1\r\n*1\r\n:1\r\n")
+
+        assertEquals(1, message.value.size)
+        with(message.value[0] as ArrayData) {
+            assertEquals(1, value.size)
+            with(value[0] as ArrayData) {
+                assertEquals(1, value.size)
+                assertTrue(value[0] is IntegerData)
+            }
+        }
     }
 }
