@@ -1,6 +1,7 @@
 package com.breader.protocol.marshaler
 
 import com.breader.protocol.type.BulkStringData
+import com.breader.protocol.type.NullData
 import com.breader.protocol.type.SimpleStringData
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -13,6 +14,11 @@ class BulkStringDataMarshallerTest {
     @Test
     fun `should marshall bulk string`() {
         assertEquals("\$5\r\nhello\r\n", marshaller.marshall(BulkStringData("hello")))
+    }
+
+    @Test
+    fun `should marshall null bulk string`() {
+        assertEquals("\$-1\r\n", marshaller.marshall(NullData()))
     }
 
     @Test
