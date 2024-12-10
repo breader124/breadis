@@ -5,7 +5,6 @@ import com.breader.protocol.type.Data
 import com.breader.protocol.type.NullData
 
 class BulkStringDataParser : DataParser {
-
     override fun parse(message: String): Data {
         if (message == "-1") {
             return NullData()
