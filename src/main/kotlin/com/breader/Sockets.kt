@@ -12,6 +12,8 @@ fun Application.configureSockets() {
     val selectorManager = ActorSelectorManager(Dispatchers.IO)
     val defaultPort = 9002
 
+    val messageHandler = MessageHandler()
+
     runBlocking {
         val serverSocket = aSocket(selectorManager).tcp().bind(port = defaultPort)
         println("Echo Server listening at ${serverSocket.localAddress}")
@@ -23,13 +25,14 @@ fun Application.configureSockets() {
                 val write = socket.openWriteChannel(autoFlush = true)
                 try {
                     while (true) {
-                        val line = read.readUTF8Line()
-                        // parse the received message
-                        // TODO try to recognize the command (technically, it's an array of bulk strings)
-                        // execute the command (commands use data types defined by the protocol)
-                        // marshall the result (commands result is marshalled according to the protocol)
-                        // send the result back to the client
-                        write.writeStringUtf8("$line\n")
+                        val message = ByteArray(8192).let {
+                            read.readAvailable(it)
+                            it.filterNot { byte -> byte.toInt() == 0 }
+                                .toByteArray()
+                                .let { bytes -> String(bytes, Charsets.UTF_8) }
+                        }
+                        val result = message.let { messageHandler.handle(it) }
+                        write.writeStringUtf8(result)
                     }
                 } catch (_: Throwable) {
                     socket.close()

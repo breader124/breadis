@@ -15,7 +15,7 @@ class ArrayDataParserTest {
 
     @Test
     fun `should parse array consisting of same type elems`() {
-        val message = dataParser.parse("3\r\n:1\r\n:2\r\n:3\r\n")
+        val message = dataParser.parse("3\r\n:1\r\n:2\r\n:3")
 
         assertEquals(3, message.value.size)
         message.value.forEachIndexed { index, data ->
@@ -26,7 +26,7 @@ class ArrayDataParserTest {
 
     @Test
     fun `should parse array consisting of different type elems`() {
-        val message = dataParser.parse("3\r\n:1\r\n+OK\r\n$5\r\nhello\r\n")
+        val message = dataParser.parse("3\r\n:1\r\n+OK\r\n$5\r\nhello")
 
         assertEquals(3, message.value.size)
 
@@ -42,14 +42,14 @@ class ArrayDataParserTest {
 
     @Test
     fun `should parse empty array`() {
-        val message = dataParser.parse("0\r\n")
+        val message = dataParser.parse("0")
 
         assertEquals(0, message.value.size)
     }
 
     @Test
     fun `should parse array with null elem`() {
-        val message = dataParser.parse("1\r\n$-1\r\n")
+        val message = dataParser.parse("1\r\n$-1")
 
         assertEquals(1, message.value.size)
         assertTrue(message.value[0] is NullData)
@@ -57,7 +57,7 @@ class ArrayDataParserTest {
 
     @Test
     fun `should parse array with nested array`() {
-        val message = dataParser.parse("2\r\n*3\r\n:1\r\n:2\r\n:3\r\n*2\r\n+OK\r\n$5\r\nhello\r\n")
+        val message = dataParser.parse("2\r\n*3\r\n:1\r\n:2\r\n:3\r\n*2\r\n+OK\r\n$5\r\nhello")
 
         assertEquals(2, message.value.size)
         with(message.value[0] as ArrayData) {
@@ -73,7 +73,7 @@ class ArrayDataParserTest {
 
     @Test
     fun `should parse multi-level nested array`() {
-        val message = dataParser.parse("1\r\n*1\r\n*1\r\n:1\r\n")
+        val message = dataParser.parse("1\r\n*1\r\n*1\r\n:1")
 
         assertEquals(1, message.value.size)
         with(message.value[0] as ArrayData) {

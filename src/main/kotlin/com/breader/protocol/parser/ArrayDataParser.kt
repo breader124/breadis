@@ -20,6 +20,10 @@ class ArrayDataParser : DataParser {
     override fun parse(data: String): ArrayData = internalParse(data).first
 
     private fun internalParse(data: String): Pair<ArrayData, String> {
+        if (data == "0") {
+            return Pair(ArrayData(emptyList()), "")
+        }
+
         val arraySize = runCatching { data.substringBefore(TERMINATOR, "").toInt() }
             .getOrElse { throw IllegalArgumentException(it.message) }
         var contentToParse = data.substringAfter(TERMINATOR)
@@ -35,7 +39,11 @@ class ArrayDataParser : DataParser {
                     ?.let { parsedContent.add(it) }
                     ?: throw IllegalArgumentException("Unsupported data type: $data")
 
-                contentToParse = contentToParse.substring(TYPE_LENGTH + data.length + TERMINATOR.length)
+                contentToParse = if (contentToParse.length == TYPE_LENGTH + data.length) {
+                    ""
+                } else {
+                    contentToParse.substring(TYPE_LENGTH + data.length + TERMINATOR.length)
+                }
             } else {
                 val arrayWithoutType = contentToParse.substring(1)
                 val (parsedNestedArray, contentWithoutNestedArray) = internalParse(arrayWithoutType)
@@ -52,10 +60,10 @@ class ArrayDataParser : DataParser {
         '+', '-', ':' -> substring(1).substringBefore(TERMINATOR)
         '$' -> {
             val dataLength = substring(1).substringBefore(TERMINATOR).toInt()
-            val lengthPos = indexOf(TERMINATOR)
             if (dataLength == -1) {
-                substring(1, lengthPos)
+                substring(1)
             } else {
+                val lengthPos = indexOf(TERMINATOR)
                 substring(1, lengthPos + TERMINATOR.length + dataLength)
             }
         }
