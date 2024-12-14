@@ -1,3 +1,3 @@
 package com.breader.protocol.type
 
-class IntegerData(val value: Int) : Data
+data class IntegerData(val value: Int) : Data

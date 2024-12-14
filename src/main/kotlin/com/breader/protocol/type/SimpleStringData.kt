@@ -1,3 +1,3 @@
 package com.breader.protocol.type
 
-class SimpleStringData(val value: String) : Data
+data class SimpleStringData(val value: String) : Data

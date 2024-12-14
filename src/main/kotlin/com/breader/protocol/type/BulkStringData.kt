@@ -1,5 +1,5 @@
 package com.breader.protocol.type
 
-class BulkStringData(val value: String) : Data
+data class BulkStringData(val value: String) : Data
 
 class NullData() : Data
