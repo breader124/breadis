@@ -15,29 +15,36 @@ fun Application.configureSockets() {
     val messageHandler = MessageHandler()
 
     runBlocking {
-        val serverSocket = aSocket(selectorManager).tcp().bind(port = defaultPort)
-        println("Echo Server listening at ${serverSocket.localAddress}")
-        while (true) {
-            val socket = serverSocket.accept()
-            println("Accepted $socket")
-            launch {
-                val read = socket.openReadChannel()
-                val write = socket.openWriteChannel(autoFlush = true)
-                try {
-                    while (true) {
-                        val message = ByteArray(8192).let {
-                            read.readAvailable(it)
-                            it.filterNot { byte -> byte.toInt() == 0 }
-                                .toByteArray()
-                                .let { bytes -> String(bytes, Charsets.UTF_8) }
+        aSocket(selectorManager).tcp().bind(port = defaultPort).use {
+            while (true) {
+                val socket = it.accept()
+                launch {
+                    val read = socket.openReadChannel()
+                    val write = socket.openWriteChannel(autoFlush = true)
+                    runCatching {
+                        while (true) {
+                            handleIncomingMessage(read, messageHandler, write)
                         }
-                        val result = message.let { messageHandler.handle(it) }
-                        write.writeStringUtf8(result)
+                    }.onFailure {
+                        socket.close()
                     }
-                } catch (_: Throwable) {
-                    socket.close()
                 }
             }
         }
     }
+}
+
+private suspend fun handleIncomingMessage(
+    read: ByteReadChannel,
+    messageHandler: MessageHandler,
+    write: ByteWriteChannel
+) {
+    val message = ByteArray(8192).let {
+        read.readAvailable(it)
+        it.filterNot { byte -> byte.toInt() == 0 }
+            .toByteArray()
+            .let { bytes -> String(bytes, Charsets.UTF_8) }
+    }
+    val result = message.let { messageHandler.handle(it) }
+    write.writeStringUtf8(result)
 }

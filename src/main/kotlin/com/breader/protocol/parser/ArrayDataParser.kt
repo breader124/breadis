@@ -2,6 +2,8 @@ package com.breader.protocol.parser
 
 import com.breader.protocol.type.ArrayData
 import com.breader.protocol.type.Data
+import kotlin.text.substringAfter
+import kotlin.text.substringBefore
 
 class ArrayDataParser : DataParser {
 
@@ -21,12 +23,10 @@ class ArrayDataParser : DataParser {
 
     private fun internalParse(data: String): Pair<ArrayData, String> {
         if (data == "0") {
-            return Pair(ArrayData(emptyList()), "")
+            return ArrayData(emptyList()) to ""
         }
 
-        val arraySize = runCatching { data.substringBefore(TERMINATOR, "").toInt() }
-            .getOrElse { throw IllegalArgumentException(it.message) }
-        var contentToParse = data.substringAfter(TERMINATOR)
+        var (arraySize, contentToParse) = decomposeArray(data)
 
         val parsedContent = mutableListOf<Data>()
         repeat(arraySize) {
@@ -39,13 +39,13 @@ class ArrayDataParser : DataParser {
                     ?.let { parsedContent.add(it) }
                     ?: throw IllegalArgumentException("Unsupported data type: $data")
 
-                contentToParse = if (contentToParse.length == TYPE_LENGTH + data.length) {
-                    ""
-                } else {
-                    contentToParse.substring(TYPE_LENGTH + data.length + TERMINATOR.length)
+                contentToParse = contentToParse.substring(TYPE_LENGTH + data.length)
+                if (contentToParse.isNotEmpty()) {
+                    contentToParse = contentToParse.substring(TERMINATOR.length)
                 }
             } else {
                 val arrayWithoutType = contentToParse.substring(1)
+
                 val (parsedNestedArray, contentWithoutNestedArray) = internalParse(arrayWithoutType)
 
                 parsedContent.add(parsedNestedArray)
@@ -53,7 +53,15 @@ class ArrayDataParser : DataParser {
             }
         }
 
-        return Pair(ArrayData(parsedContent), contentToParse)
+        return ArrayData(parsedContent) to contentToParse
+    }
+
+    private fun decomposeArray(data: String): Pair<Int, String> {
+        val arraySize = runCatching { data.substringBefore(TERMINATOR, "").toInt() }
+            .getOrElse { throw IllegalArgumentException(it.message) }
+        var contentToParse = data.substringAfter(TERMINATOR)
+
+        return arraySize to contentToParse
     }
 
     private fun String.extractNextData(type: Char): String = when (type) {
