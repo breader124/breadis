@@ -1,10 +1,10 @@
-package com.breader.command
+package com.breader.command.impl
 
-import com.breader.command.impl.PingCommand
 import com.breader.protocol.type.BulkStringData
 import com.breader.protocol.type.ErrorData
 import com.breader.protocol.type.SimpleStringData
-import kotlin.test.Test
+import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class PingCommandTest {
@@ -16,7 +16,7 @@ class PingCommandTest {
         val result = command.execute(listOf(BulkStringData("PING")))
 
         assertTrue(result is SimpleStringData)
-        assertTrue(result.value == "PONG")
+        assertEquals("PONG", result.value)
     }
 
     @Test
@@ -24,7 +24,7 @@ class PingCommandTest {
         val result = command.execute(listOf(BulkStringData("PING"), BulkStringData("arg")))
 
         assertTrue(result is BulkStringData)
-        assertTrue(result.value == "arg")
+        assertEquals("arg", result.value)
     }
 
     @Test
@@ -32,7 +32,7 @@ class PingCommandTest {
         val result = command.execute(listOf(BulkStringData("PING"), BulkStringData("arg1"), BulkStringData("arg2")))
 
         assertTrue(result is ErrorData)
-        assertTrue(result.type == "ARG")
-        assertTrue(result.message == "Invalid number of arguments for PING command")
+        assertEquals("ARG", result.type)
+        assertEquals("Invalid number of arguments for PING command", result.message)
     }
 }

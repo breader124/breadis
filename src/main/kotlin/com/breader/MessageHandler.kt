@@ -5,7 +5,6 @@ import com.breader.protocol.MessageMarshaller
 import com.breader.protocol.MessageParser
 
 class MessageHandler() {
-
     private val messageParser = MessageParser()
     private val commandDispatcher = CommandDispatcher()
     private val messageMarshaller = MessageMarshaller()
