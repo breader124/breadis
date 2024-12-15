@@ -26,6 +26,19 @@ class CommandDispatcherTest {
     }
 
     @Test
+    fun `should dispatch command written with another case`() {
+        // given
+        val incomingPingCommand = ArrayData(listOf(BulkStringData("ping")))
+
+        // when
+        val result = dispatcher.dispatch(incomingPingCommand)
+
+        // then
+        assertTrue(result is SimpleStringData)
+        assertEquals("PONG", result.value)
+    }
+
+    @Test
     fun `should throw exception when unknown command`() {
         // given
         val incomingUnknownCommand = ArrayData(listOf(BulkStringData("UNKNOWN")))

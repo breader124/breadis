@@ -21,8 +21,13 @@ class CommandDispatcher {
         val commandArguments = command.value.filterIsInstance<BulkStringData>()
         require(command.value.size == commandArguments.size) { "All command args must be of BulkStringData type" }
 
-        val chosenCommand = commandAssociation[commandArguments[0]] ?: throw IllegalArgumentException("Unknown command")
+        val chosenCommand = commandAssociation.retrieveCommandCaseInsensitive(commandArguments[0])
         return chosenCommand.execute(commandArguments)
 
     }
+
+    private fun Map<BulkStringData, Command>.retrieveCommandCaseInsensitive(commandName: BulkStringData): Command =
+        this[commandName]
+            ?: this[BulkStringData(commandName.value.uppercase())]
+            ?: throw IllegalArgumentException("Unknown command")
 }
