@@ -1,13 +1,15 @@
 package com.breader
 
 import com.breader.command.CommandDispatcher
+import com.breader.engine.Storage
 import com.breader.protocol.MessageMarshaller
 import com.breader.protocol.MessageParser
 import com.breader.protocol.type.ErrorData
 
-class MessageHandler() {
+class MessageHandler(storage: Storage) {
+
     private val messageParser = MessageParser()
-    private val commandDispatcher = CommandDispatcher()
+    private val commandDispatcher = CommandDispatcher(storage)
     private val messageMarshaller = MessageMarshaller()
 
     fun handle(message: String): String = runCatching {

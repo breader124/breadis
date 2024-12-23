@@ -1,6 +1,27 @@
 package com.breader.engine
 
-class Storage : BasicOperations, IntegerOperations {
+import com.breader.engine.data.InternalData
+import java.util.concurrent.ConcurrentHashMap
+
+class Storage(
+    private val internalStorage: MutableMap<StorageKey, InternalData> = ConcurrentHashMap<StorageKey, InternalData>()
+) : BasicOperations {
+
+    override fun get(key: String): InternalData? {
+        val storageKey = StorageKey(key)
+        return internalStorage[storageKey]
+    }
+
+    override fun set(key: String, value: InternalData): InternalData? {
+        val storageKey = StorageKey(key)
+        return internalStorage.put(storageKey, value)
+    }
+
+    override fun setIfAbsent(key: String, value: InternalData): InternalData? {
+        val storageKey = StorageKey(key)
+        return internalStorage.putIfAbsent(storageKey, value)
+    }
+
     /*
     Things to consider while designing the storage:
     - there is a number of options related to setting the data
@@ -33,3 +54,5 @@ class Storage : BasicOperations, IntegerOperations {
         through the properly designed interface
      */
 }
+
+data class StorageKey(val value: String)

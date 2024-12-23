@@ -1,5 +1,6 @@
 val kotlin_version: String by project
 val logback_version: String by project
+val mockk_version: String by project
 
 plugins {
     kotlin("jvm") version "2.0.21"
@@ -29,6 +30,7 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation("io.ktor:ktor-server-test-host-jvm")
+    testImplementation("io.mockk:mockk:${mockk_version}")
 }
 
 tasks.withType<Test> {

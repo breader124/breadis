@@ -1,4 +1,3 @@
 package com.breader.engine.data
 
-class InternalString {
-}
+data class InternalString(val value: String) : InternalData()

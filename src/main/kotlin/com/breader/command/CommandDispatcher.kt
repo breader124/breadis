@@ -1,14 +1,14 @@
 package com.breader.command
 
-import com.breader.command.impl.Command
-import com.breader.command.impl.EchoCommand
-import com.breader.command.impl.PingCommand
+import com.breader.command.impl.*
+import com.breader.engine.Storage
 import com.breader.protocol.type.ArrayData
 import com.breader.protocol.type.BulkStringData
 import com.breader.protocol.type.Data
 
-class CommandDispatcher {
-    private val commands: List<Command> = listOf(PingCommand(), EchoCommand())
+class CommandDispatcher(storage: Storage) {
+
+    private val commands: List<Command> = listOf(PingCommand(), EchoCommand(), GetCommand(storage), SetCommand(storage))
     private val commandAssociation = mutableMapOf<BulkStringData, Command>()
 
     init {

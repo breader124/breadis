@@ -1,8 +1,10 @@
 package com.breader.command
 
+import com.breader.engine.Storage
 import com.breader.protocol.type.ArrayData
 import com.breader.protocol.type.BulkStringData
 import com.breader.protocol.type.SimpleStringData
+import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -10,7 +12,8 @@ import kotlin.test.assertTrue
 
 class CommandDispatcherTest {
 
-    private val dispatcher = CommandDispatcher()
+    private val storage = mockk<Storage>()
+    private val dispatcher = CommandDispatcher(storage)
 
     @Test
     fun `should dispatch command`() {

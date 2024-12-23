@@ -1,3 +1,3 @@
 package com.breader.engine.data
 
-class InternalData
+open class InternalData

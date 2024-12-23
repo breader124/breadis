@@ -1,5 +1,6 @@
 package com.breader
 
+import com.breader.engine.Storage
 import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
 import io.ktor.server.application.*
@@ -12,7 +13,8 @@ fun Application.configureSockets() {
     val selectorManager = ActorSelectorManager(Dispatchers.IO)
     val defaultPort = 9002
 
-    val messageHandler = MessageHandler()
+    val storage = Storage()
+    val messageHandler = MessageHandler(storage)
 
     runBlocking {
         aSocket(selectorManager).tcp().bind(port = defaultPort).use {

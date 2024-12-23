@@ -1,11 +1,13 @@
 package com.breader
 
+import com.breader.engine.Storage
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class MessageHandlerTest {
 
-    private val messageHandler = MessageHandler()
+    private val storage = Storage()
+    private val messageHandler = MessageHandler(storage)
 
     @Test
     fun `should handle message`() {
