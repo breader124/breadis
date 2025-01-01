@@ -8,7 +8,7 @@ import com.breader.protocol.type.IntegerData
 
 class ExistsCommand(private val storage: Storage) : Command {
 
-    override fun name(): BulkStringData = BulkStringData("EXISTS")
+    override fun name() = BulkStringData("EXISTS")
 
     override fun execute(args: List<BulkStringData>): Data {
         if (args.size < 2) {

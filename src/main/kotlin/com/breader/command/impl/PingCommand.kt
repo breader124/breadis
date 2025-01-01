@@ -6,6 +6,7 @@ import com.breader.protocol.type.ErrorData
 import com.breader.protocol.type.SimpleStringData
 
 class PingCommand : Command {
+
     override fun name() = BulkStringData("PING")
 
     override fun execute(args: List<BulkStringData>): Data {

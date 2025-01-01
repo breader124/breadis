@@ -25,7 +25,7 @@ class SetCommand(
             val expirationOption = args[3].value
             val expirationAbsoluteValue = args[4].value.toLong()
 
-            val expirationTime = when (expirationOption) {
+            val expirationTime = when (expirationOption.uppercase()) {
                 "EX" -> clock.instant().plusSeconds(expirationAbsoluteValue)
                 "PX" -> clock.instant().plusMillis(expirationAbsoluteValue)
                 "EXAT" -> Instant.ofEpochSecond(expirationAbsoluteValue)

@@ -5,6 +5,7 @@ import com.breader.protocol.type.Data
 import com.breader.protocol.type.ErrorData
 
 class EchoCommand : Command {
+
     override fun name() = BulkStringData("ECHO")
 
     override fun execute(args: List<BulkStringData>): Data {
