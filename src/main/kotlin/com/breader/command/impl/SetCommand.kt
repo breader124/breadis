@@ -1,7 +1,6 @@
 package com.breader.command.impl
 
 import com.breader.engine.Storage
-import com.breader.engine.data.InternalString
 import com.breader.protocol.type.BulkStringData
 import com.breader.protocol.type.Data
 import com.breader.protocol.type.ErrorData
@@ -16,7 +15,7 @@ class SetCommand(private val storage: Storage) : Command {
             return ErrorData("ARG", "SET command requires 3 arguments")
         }
 
-        storage.set(args[1].value, InternalString(args[2].value))
+        storage.set(args[1].value, args[2].value)
         return SimpleStringData("OK")
     }
 }

@@ -1,3 +1,5 @@
 package com.breader.engine.data
 
-open class InternalData
+import java.time.Instant
+
+open class InternalData(open val expirationTime: Instant? = null)
