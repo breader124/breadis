@@ -5,6 +5,7 @@ import java.time.Instant
 
 interface BasicOperations {
     fun get(key: String): InternalData?
+    fun exists(key: String): Boolean
 
     fun set(key: String, value: String): InternalData?
     fun setExpiring(key: String, value: String, expirationTime: Instant): InternalData?

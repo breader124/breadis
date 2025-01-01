@@ -7,6 +7,7 @@ import java.time.ZoneId
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertTrue
 
 class StorageTest {
 
@@ -38,6 +39,17 @@ class StorageTest {
 
         // then
         assertEquals(null, result)
+    }
+
+    @Test
+    fun `should report value as existing`() {
+        // given
+        val storage = initStorage {
+            set("key", "value")
+        }
+
+        // when + then
+        assertTrue { storage.exists("key") }
     }
 
     @Test

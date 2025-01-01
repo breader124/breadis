@@ -8,7 +8,13 @@ import com.breader.protocol.type.Data
 
 class CommandDispatcher(storage: Storage) {
 
-    private val commands: List<Command> = listOf(PingCommand(), EchoCommand(), GetCommand(storage), SetCommand(storage))
+    private val commands: List<Command> = listOf(
+        PingCommand(),
+        EchoCommand(),
+        GetCommand(storage),
+        ExistsCommand(storage),
+        SetCommand(storage)
+    )
     private val commandAssociation = mutableMapOf<BulkStringData, Command>()
 
     init {

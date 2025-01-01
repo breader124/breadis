@@ -16,6 +16,8 @@ class Storage(
         return internalStorage[storageKey].takeIf { it?.expirationTime?.isAfter(Instant.now(clock)) != false }
     }
 
+    override fun exists(key: String): Boolean = get(key) != null
+
     override fun set(key: String, value: String): InternalData? {
         val storageKey = StorageKey(key)
         val value = InternalString(value)
