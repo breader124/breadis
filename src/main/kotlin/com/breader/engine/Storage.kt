@@ -1,15 +1,20 @@
 package com.breader.engine
 
 import com.breader.engine.data.InternalData
+import com.breader.engine.data.InternalList
 import com.breader.engine.data.InternalString
+import com.breader.engine.operations.BasicOperations
+import com.breader.engine.operations.ListOperations
+import com.breader.engine.operations.StringOperations
 import java.time.Clock
 import java.time.Instant
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class Storage(
     private val clock: Clock = Clock.systemDefaultZone(),
     private val internalStorage: MutableMap<StorageKey, InternalData> = ConcurrentHashMap<StorageKey, InternalData>()
-) : BasicOperations {
+) : BasicOperations, StringOperations, ListOperations {
 
     override fun get(key: String): InternalData? {
         val storageKey = StorageKey(key)
@@ -24,22 +29,24 @@ class Storage(
 
     override fun exists(key: String): Boolean = get(key) != null
 
-    override fun set(key: String, value: String): InternalData? {
+    // necessary due to the missing active expiration mechanism, this behaviour fakes its existence to the client
+    override fun delete(key: String): Boolean {
+        val storageKey = StorageKey(key)
+        return internalStorage.remove(storageKey)?.let {
+            it.expirationTime?.isAfter(Instant.now(clock)) != false
+        } == true
+    }
+
+    override fun set(key: String, value: String) {
         val storageKey = StorageKey(key)
         val value = InternalString(value)
-        return internalStorage.put(storageKey, value)
+        internalStorage.put(storageKey, value)
     }
 
-    override fun setExpiring(key: String, value: String, expirationTime: Instant): InternalData? {
-        val storageKey = StorageKey(key)
-        val value = InternalString(value, expirationTime)
-        return internalStorage.put(storageKey, value)
-    }
-
-    override fun setIfAbsent(key: String, value: String): InternalData? {
+    override fun setIfAbsent(key: String, value: String) {
         val storageKey = StorageKey(key)
         val newValue = InternalString(value)
-        return internalStorage.compute(storageKey) { _, oldValue ->
+        internalStorage.compute(storageKey) { _, oldValue ->
             if (oldValue == null || oldValue.expirationTime?.isBefore(Instant.now(clock)) == true) {
                 newValue
             } else {
@@ -48,10 +55,16 @@ class Storage(
         }
     }
 
-    override fun setIfAbsentExpiring(key: String, value: String, expirationTime: Instant): InternalData? {
+    override fun setExpiring(key: String, value: String, expirationTime: Instant) {
+        val storageKey = StorageKey(key)
+        val value = InternalString(value, expirationTime)
+        internalStorage.put(storageKey, value)
+    }
+
+    override fun setIfAbsentExpiring(key: String, value: String, expirationTime: Instant) {
         val storageKey = StorageKey(key)
         val newValue = InternalString(value, expirationTime)
-        return internalStorage.compute(storageKey) { _, oldValue ->
+        internalStorage.compute(storageKey) { _, oldValue ->
             if (oldValue == null || oldValue.expirationTime?.isAfter(Instant.now(clock)) == true) {
                 newValue
             } else {
@@ -60,12 +73,27 @@ class Storage(
         }
     }
 
-    // necessary due to the missing active expiration mechanism, this behaviour fakes its existence to the client
-    override fun delete(key: String): Boolean {
+    override fun lpush(key: String, values: List<String>): Int {
         val storageKey = StorageKey(key)
-        return internalStorage.remove(storageKey)?.let {
-            it.expirationTime?.isAfter(Instant.now(clock)) != false
-        } == true
+        val newElems = LinkedList<InternalString>()
+            .also { values.forEach { value -> it.add(InternalString(value)) } }
+            .let { InternalList(it) }
+
+        var modifiedListLen = values.size
+        internalStorage.merge(storageKey, newElems) { oldList, newElems ->
+            if (oldList !is InternalList || newElems !is InternalList) {
+                throw IllegalArgumentException("Key $key is not a list")
+            }
+            modifiedListLen += oldList.value.size
+
+            oldList.also { newElems.value.forEach { v -> it.value.addFirst(v) } }
+        }
+
+        return modifiedListLen
+    }
+
+    override fun rpush(key: String, values: List<String>): Int {
+        TODO("Not yet implemented")
     }
 }
 

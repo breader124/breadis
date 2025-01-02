@@ -1,5 +1,6 @@
 package com.breader.engine
 
+import com.breader.engine.data.InternalList
 import com.breader.engine.data.InternalString
 import java.time.Clock
 import java.time.Instant
@@ -153,6 +154,74 @@ class StorageTest {
         // when
         assertFalse { storage.delete("key") }
     }
+
+    @Test
+    fun `should create a new list and push value into it when key does not exist`() {
+        // given
+        val storage = Storage()
+
+        // when
+        val result = storage.lpush("key", listOf("value"))
+
+        // then
+        assertEquals(1, result)
+        assertEquals(listOf(InternalString("value")), storage.getList("key"))    }
+
+    @Test
+    fun `should push value into existing list`() {
+        // given
+        val storage = initStorage {
+            lpush("key", listOf("value1"))
+        }
+
+        // when
+        val result = storage.lpush("key", listOf("value2"))
+
+        // then
+        assertEquals(2, result)
+        assertEquals(
+            listOf(
+                InternalString("value2"),
+                InternalString("value1")
+            ),
+            storage.getList("key")
+        )
+    }
+
+    @Test
+    fun `should push multiple values into existing list`() {
+        // given
+        val storage = initStorage {
+            lpush("key", listOf("value1"))
+        }
+
+        // when
+        val result = storage.lpush("key", listOf("value2", "value3"))
+
+        // then
+        assertEquals(3, result)
+        assertEquals(
+            listOf(
+                InternalString("value3"),
+                InternalString("value2"),
+                InternalString("value1")
+            ),
+            storage.getList("key")
+        )
+    }
+
+    @Test
+    fun `should not push value into non-list key`() {
+        // given
+        val storage = initStorage {
+            set("key", "value")
+        }
+
+        // when + then
+        assertFailsWith<IllegalArgumentException> { storage.lpush("key", listOf("value")) }
+    }
 }
 
 private fun Storage.getString(key: String): String? = (this.get(key) as? InternalString)?.value
+
+private fun Storage.getList(key: String): List<InternalString>? = (this.get(key) as? InternalList)?.value

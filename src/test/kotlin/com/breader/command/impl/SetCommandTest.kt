@@ -4,8 +4,10 @@ import com.breader.engine.Storage
 import com.breader.protocol.type.BulkStringData
 import com.breader.protocol.type.ErrorData
 import com.breader.protocol.type.SimpleStringData
+import io.mockk.Runs
 import io.mockk.confirmVerified
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import java.time.Clock
@@ -25,7 +27,7 @@ class SetCommandTest {
     @Test
     fun `should set value in storage`() {
         // given
-        every { storage.set(any(), any()) } returns null
+        every { storage.set(any(), any()) } just Runs
 
         // when
         val result = command.execute(
@@ -44,7 +46,7 @@ class SetCommandTest {
     @Test
     fun `should set value with expiration time in seconds`() {
         // given
-        every { storage.setExpiring(any(), any(), any()) } returns null
+        every { storage.setExpiring(any(), any(), any()) } just Runs
 
         // when
         command.execute(
@@ -68,7 +70,7 @@ class SetCommandTest {
     @Test
     fun `should set value with expiration time in millis`() {
         // given
-        every { storage.setExpiring(any(), any(), any()) } returns null
+        every { storage.setExpiring(any(), any(), any()) } just Runs
 
         // when
         command.execute(
@@ -92,7 +94,7 @@ class SetCommandTest {
     @Test
     fun `should set value with expiration time set to specific Unix seconds timestamp`() {
         // given
-        every { storage.setExpiring(any(), any(), any()) } returns null
+        every { storage.setExpiring(any(), any(), any()) } just Runs
 
         // when
         command.execute(
@@ -116,7 +118,7 @@ class SetCommandTest {
     @Test
     fun `should set value with expiration time set to specific Unix millis timestamp`() {
         // given
-        every { storage.setExpiring(any(), any(), any()) } returns null
+        every { storage.setExpiring(any(), any(), any()) } just Runs
 
         // when
         command.execute(

@@ -5,3 +5,5 @@ Breadis is a lightweight implementation of Redis, supporting a few operations ex
 ## Improvement opportunities
 
 - [ ] Add support for an active expiration mechanism in addition to the implemented passive expiration mechanism.
+- [ ] Expiration checking tends to be present in implementation of many operations. It should be checked if it can be abstracted out.
+- [ ] Consider splitting Storage class into multiple classes implementing different operations sets.
