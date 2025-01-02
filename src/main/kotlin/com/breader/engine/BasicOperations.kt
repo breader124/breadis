@@ -12,4 +12,6 @@ interface BasicOperations {
 
     fun setIfAbsent(key: String, value: String): InternalData?
     fun setIfAbsentExpiring(key: String, value: String, expirationTime: Instant): InternalData?
+
+    fun delete(key: String): Boolean
 }

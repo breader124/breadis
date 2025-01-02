@@ -4,10 +4,7 @@ import com.breader.engine.data.InternalString
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneId
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertIs
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class StorageTest {
 
@@ -123,6 +120,38 @@ class StorageTest {
 
         // then
         assertEquals("modifiedValue", storage.getString("key"))
+    }
+
+    @Test
+    fun `should delete existing value`() {
+        // given
+        val storage = initStorage {
+            set("key", "value")
+        }
+
+        // when + then
+        assertTrue { storage.delete("key") }
+    }
+
+    @Test
+    fun `should not delete non-existing value`() {
+        // given
+        val storage = Storage()
+
+        // when + then
+        assertFalse { storage.delete("key") }
+    }
+
+    @Test
+    fun `should not delete expired value`() {
+        // given
+        val fixedClock = Clock.fixed(Instant.now(), ZoneId.systemDefault())
+        val storage = initStorage(fixedClock) {
+            setExpiring("key", "value", fixedClock.instant().minusSeconds(5))
+        }
+
+        // when
+        assertFalse { storage.delete("key") }
     }
 }
 

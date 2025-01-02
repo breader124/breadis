@@ -13,7 +13,13 @@ class Storage(
 
     override fun get(key: String): InternalData? {
         val storageKey = StorageKey(key)
-        return internalStorage[storageKey].takeIf { it?.expirationTime?.isAfter(Instant.now(clock)) != false }
+        return internalStorage.compute(storageKey) { _, oldValue ->
+            if (oldValue?.expirationTime?.isBefore(clock.instant()) == true) {
+                null
+            } else {
+                oldValue
+            }
+        }
     }
 
     override fun exists(key: String): Boolean = get(key) != null
@@ -52,6 +58,14 @@ class Storage(
                 oldValue
             }
         }
+    }
+
+    // necessary due to the missing active expiration mechanism, this behaviour fakes its existence to the client
+    override fun delete(key: String): Boolean {
+        val storageKey = StorageKey(key)
+        return internalStorage.remove(storageKey)?.let {
+            it.expirationTime?.isAfter(Instant.now(clock)) != false
+        } == true
     }
 }
 

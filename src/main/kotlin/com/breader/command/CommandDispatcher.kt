@@ -13,7 +13,8 @@ class CommandDispatcher(storage: Storage) {
         EchoCommand(),
         GetCommand(storage),
         ExistsCommand(storage),
-        SetCommand(storage)
+        SetCommand(storage),
+        DelCommand(storage)
     )
     private val commandAssociation = mutableMapOf<BulkStringData, Command>()
 
