@@ -11,6 +11,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
 class ExistsCommandTest {
+
     private val storage = mockk<Storage>()
     private val command = ExistsCommand(storage)
 

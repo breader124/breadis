@@ -14,7 +14,9 @@ class CommandDispatcher(storage: Storage) {
         GetCommand(storage),
         ExistsCommand(storage),
         SetCommand(storage),
-        DelCommand(storage)
+        DelCommand(storage),
+        LeftPushCommand(storage),
+        RightPushCommand(storage)
     )
     private val commandAssociation = mutableMapOf<BulkStringData, Command>()
 
