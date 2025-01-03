@@ -156,7 +156,7 @@ class StorageTest {
     }
 
     @Test
-    fun `should create a new list and push value into it when key does not exist`() {
+    fun `should create a new list and lpush value into it when key does not exist`() {
         // given
         val storage = Storage()
 
@@ -165,10 +165,24 @@ class StorageTest {
 
         // then
         assertEquals(1, result)
-        assertEquals(listOf(InternalString("value")), storage.getList("key"))    }
+        assertEquals(listOf(InternalString("value")), storage.getList("key"))
+    }
 
     @Test
-    fun `should push value into existing list`() {
+    fun `should create a new list and rpush value into it when key does not exist`() {
+        // given
+        val storage = Storage()
+
+        // when
+        val result = storage.rpush("key", listOf("value"))
+
+        // then
+        assertEquals(1, result)
+        assertEquals(listOf(InternalString("value")), storage.getList("key"))
+    }
+
+    @Test
+    fun `should push value into the beginning of the existing list`() {
         // given
         val storage = initStorage {
             lpush("key", listOf("value1"))
@@ -189,7 +203,28 @@ class StorageTest {
     }
 
     @Test
-    fun `should push multiple values into existing list`() {
+    fun `should push value at the end of the existing list`() {
+        // given
+        val storage = initStorage {
+            lpush("key", listOf("value1"))
+        }
+
+        // when
+        val result = storage.rpush("key", listOf("value2"))
+
+        // then
+        assertEquals(2, result)
+        assertEquals(
+            listOf(
+                InternalString("value1"),
+                InternalString("value2")
+            ),
+            storage.getList("key")
+        )
+    }
+
+    @Test
+    fun `should push multiple values into the beginning of the existing list`() {
         // given
         val storage = initStorage {
             lpush("key", listOf("value1"))
@@ -211,6 +246,28 @@ class StorageTest {
     }
 
     @Test
+    fun `should push multiple values at the end of the existing list`() {
+        // given
+        val storage = initStorage {
+            lpush("key", listOf("value1"))
+        }
+
+        // when
+        val result = storage.rpush("key", listOf("value2", "value3"))
+
+        // then
+        assertEquals(3, result)
+        assertEquals(
+            listOf(
+                InternalString("value1"),
+                InternalString("value2"),
+                InternalString("value3")
+            ),
+            storage.getList("key")
+        )
+    }
+
+    @Test
     fun `should not push value into non-list key`() {
         // given
         val storage = initStorage {
@@ -219,6 +276,7 @@ class StorageTest {
 
         // when + then
         assertFailsWith<IllegalArgumentException> { storage.lpush("key", listOf("value")) }
+        assertFailsWith<IllegalArgumentException> { storage.rpush("key", listOf("value")) }
     }
 }
 

@@ -73,7 +73,13 @@ class Storage(
         }
     }
 
-    override fun lpush(key: String, values: List<String>): Int {
+    override fun lpush(key: String, values: List<String>): Int =
+        push(key, values) { oldList, newElem -> oldList.addFirst(newElem) }
+
+    override fun rpush(key: String, values: List<String>): Int =
+        push(key, values) { oldList, newElem -> oldList.addLast(newElem) }
+
+    private fun push(key: String, values: List<String>, mergeFun: (LinkedList<InternalString>, InternalString) -> Unit): Int {
         val storageKey = StorageKey(key)
         val newElems = LinkedList<InternalString>()
             .also { values.forEach { value -> it.add(InternalString(value)) } }
@@ -86,14 +92,10 @@ class Storage(
             }
             modifiedListLen += oldList.value.size
 
-            oldList.also { newElems.value.forEach { v -> it.value.addFirst(v) } }
+            oldList.also { newElems.value.forEach { v -> mergeFun(it.value, v) } }
         }
 
         return modifiedListLen
-    }
-
-    override fun rpush(key: String, values: List<String>): Int {
-        TODO("Not yet implemented")
     }
 }
 
