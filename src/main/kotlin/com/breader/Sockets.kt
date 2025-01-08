@@ -10,13 +10,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 fun Application.configureSockets() {
-    val selectorManager = ActorSelectorManager(Dispatchers.IO)
+    val selectorManager = ActorSelectorManager(Dispatchers.Default)
     val defaultPort = 9002
 
     val storage = Storage()
     val messageHandler = MessageHandler(storage)
 
-    runBlocking {
+    runBlocking(Dispatchers.Default) {
         aSocket(selectorManager).tcp().bind(port = defaultPort).use {
             while (true) {
                 val socket = it.accept()
@@ -41,12 +41,11 @@ private suspend fun handleIncomingMessage(
     messageHandler: MessageHandler,
     write: ByteWriteChannel
 ) {
-    val message = ByteArray(8192).let {
-        read.readAvailable(it)
-        it.filterNot { byte -> byte.toInt() == 0 }
-            .toByteArray()
-            .let { bytes -> String(bytes, Charsets.UTF_8) }
-    }
-    val result = message.let { messageHandler.handle(it) }
-    write.writeStringUtf8(result)
+    val buffer = ByteArray(1024)
+    val bytesRead = read.readAvailable(buffer).takeIf { it > 0 }
+        ?: throw IllegalStateException("Socket already closed")
+
+    val message = String(buffer, 0, bytesRead, Charsets.UTF_8)
+    val response = messageHandler.handle(message)
+    write.writeStringUtf8(response)
 }
