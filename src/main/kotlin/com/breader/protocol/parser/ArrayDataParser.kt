@@ -2,15 +2,11 @@ package com.breader.protocol.parser
 
 import com.breader.protocol.type.ArrayData
 import com.breader.protocol.type.Data
-import kotlin.text.substringAfter
-import kotlin.text.substringBefore
+
+private const val TYPE_LENGTH = 1
+private const val TERMINATOR = "\r\n"
 
 class ArrayDataParser : DataParser {
-
-    companion object {
-        private const val TYPE_LENGTH = 1
-        private const val TERMINATOR = "\r\n"
-    }
 
     private val primitiveTypeDataParsers = mapOf<Char, DataParser>(
         '+' to SimpleStringDataParser(),
@@ -31,25 +27,10 @@ class ArrayDataParser : DataParser {
         val parsedContent = mutableListOf<Data>()
         repeat(arraySize) {
             val type = contentToParse.first()
-
-            if (primitiveTypeDataParsers.keys.contains(type)) {
-                val data = contentToParse.extractNextData(type)
-
-                primitiveTypeDataParsers[type]?.parse(data)
-                    ?.let { parsedContent.add(it) }
-                    ?: throw IllegalArgumentException("Unsupported data type: $data")
-
-                contentToParse = contentToParse.substring(TYPE_LENGTH + data.length)
-                if (contentToParse.isNotEmpty()) {
-                    contentToParse = contentToParse.substring(TERMINATOR.length)
-                }
+            contentToParse = if (primitiveTypeDataParsers.keys.contains(type)) {
+                parsePrimitiveTypeData(type, parsedContent, contentToParse)
             } else {
-                val arrayWithoutType = contentToParse.substring(1)
-
-                val (parsedNestedArray, contentWithoutNestedArray) = internalParse(arrayWithoutType)
-
-                parsedContent.add(parsedNestedArray)
-                contentToParse = contentWithoutNestedArray
+                parseArray(contentToParse, parsedContent)
             }
         }
 
@@ -62,6 +43,28 @@ class ArrayDataParser : DataParser {
         var contentToParse = data.substringAfter(TERMINATOR)
 
         return arraySize to contentToParse
+    }
+
+    private fun parsePrimitiveTypeData(type: Char, parsedContent: MutableList<Data>, contentToParse: String): String {
+        val data = contentToParse.extractNextData(type)
+        primitiveTypeDataParsers[type]?.parse(data)
+            ?.let { parsedContent.add(it) }
+            ?: throw IllegalArgumentException("Unsupported data type: $data")
+
+        var newContent = contentToParse.substring(TYPE_LENGTH + data.length)
+        if (newContent.isNotEmpty()) {
+            newContent = newContent.substring(TERMINATOR.length)
+        }
+
+        return newContent
+    }
+
+    private fun parseArray(contentToParse: String, parsedContent: MutableList<Data>): String {
+        val arrayWithoutType = contentToParse.substring(1)
+        val (parsedNestedArray, contentWithoutNestedArray) = internalParse(arrayWithoutType)
+        parsedContent.add(parsedNestedArray)
+
+        return contentWithoutNestedArray
     }
 
     private fun String.extractNextData(type: Char): String = when (type) {
