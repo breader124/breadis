@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 fun Application.configureSockets() {
-    val selectorManager = ActorSelectorManager(Dispatchers.Default)
+    val selectorManager = ActorSelectorManager(Dispatchers.IO)
     val defaultPort = 9002
 
     val storage = Storage()
@@ -47,5 +47,6 @@ private suspend fun handleIncomingMessage(
 
     val message = String(buffer, 0, bytesRead, Charsets.UTF_8)
     val response = messageHandler.handle(message)
+
     write.writeStringUtf8(response)
 }
